@@ -1,5 +1,14 @@
 extends layout
 
 block content
-  h1= title
-  p Welcome to #{title}
+  p Seu ID
+  p#my-id
+  h1 Hosts conectados:
+  form
+    select#users(name='users')
+  audio#localAudio(controls autoplay)
+  audio#remoteAudio(autoplay)
+  button#refresh Atualizar
+  button#call Ligar
+  
+  

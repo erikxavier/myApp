@@ -4,11 +4,14 @@ block content
   p Seu ID
   p#my-id
   h1 Hosts conectados:
-  form
-    select#users(name='users')
+  
+  select#users(name='users')
   audio#localAudio(controls autoplay)
   audio#remoteAudio(autoplay)
   button#refresh Atualizar
   button#call Ligar
-  
+  input(type='text')#nick
+  button#conectar Conectar
+  p#status Desconectad
+    
   

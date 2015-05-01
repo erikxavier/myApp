@@ -1,17 +1,18 @@
 extends layout
 
 block content
-  p Seu ID
-  p#my-id
-  h1 Hosts conectados:
-  
-  select#users(name='users')
-  audio#localAudio(controls autoplay)
-  audio#remoteAudio(autoplay)
-  button#refresh Atualizar
-  button#call Ligar
-  input(type='text')#nick
-  button#conectar Conectar
-  p#status Desconectad
+  section
+    p Seu ID
+    p#my-id
+    h1 Hosts conectados:
+    
+    select#users(name='users')
+    audio#localAudio(autoplay)
+    audio#remoteAudio(autoplay)  
+    button#refresh.btn.btn-lg.btn-primary Atualizar
+    button#call.btn.btn-lg.btn-primary Ligar  
+    input(type='text')#nick
+    button#conectar.btn.btn-lg.btn-primary Conectar
+    p#status Desconectad
     
   

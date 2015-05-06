@@ -28,23 +28,28 @@ $(function() {
 	
 	socket.on('chamada', function(json) {
 		var chamada = JSON.parse(json);
+		console.log("Recebido de chamada:");
+		console.log(chamada);
+		$("#atender").click(function() {			
+			iniciaConversa();
+			console.log("Chamada atendida");
+			$("#status").text("Em chamada com "+peer);
+		});
 		if (chamada.error) {
 			alert("Não foi possivel realizar a operação. Erro: "+chamada.error);
 			return;
 		}
 		if (!isInCall) {
 			isInCall = true;
-			peer = chamada.de;
+			peer = chamada.dados.de;
 			$("#status").text(peer+" está ligando...")
 		}
 		
-		if (chamada.oferta) {			
-			$("#atender").click(function() {
-				ofertaRecebida = chamada.oferta;
-				iniciaConversa();
-			});			
-		} else if (chamada.resposta) {
-			pc.setRemoteDescription(new RTCSessionDescription(chamada.resposta),
+		if (chamada.dados.oferta) {			
+			ofertaRecebida = chamada.dados.oferta;
+			peer = chamada.dados.de;			
+		} else if (chamada.dados.resposta) {
+			pc.setRemoteDescription(new RTCSessionDescription(chamada.dados.resposta),
 									function() {
 										console.log("Conectado com sucesso");
 										},
@@ -54,8 +59,6 @@ $(function() {
 									);
 		}
 	})
-	
-
 	
 	function resetState() {
 		isInCall = false;
@@ -96,7 +99,7 @@ $(function() {
 	//Callbacks do getUserMedia
 	//Sucesso
 	function getMediaOk(stream) {
-		
+		console.log("Peer dentro de getMediaOk "+peer+"...");
 		//Cria o RTCPeerConnection
 		pc = new window.RTCPeerConnection(ice);
 		
@@ -109,7 +112,7 @@ $(function() {
 		pc.onicecandidate = onIceCandidate;
 		
 		if (isCaller) {
-			//Chamar createOffer() irá executar o processo ICE
+			//Chamar createOffer() irá executar o processo ICE			
 			pc.createOffer(function (offerSDP) {
 						   		pc.setLocalDescription(new RTCSessionDescription(offerSDP),
 								   						//Sucesso ao setar localDescription - pode enviar a oferta(trickle ICE)
@@ -127,19 +130,22 @@ $(function() {
 		} else {
 			pc.setRemoteDescription(new RTCSessionDescription(ofertaRecebida),
 									function() {
-										pc.createAnswer(function (respostaSDP) {
-											pc.setLocalDescription(new RTCSessionDescription(respostaSDP),
-									   						//Sucesso ao setar localDescription - pode enviar a oferta(trickle ICE)
-															function() {
-																console.log("SDP Local configurado");
-															},
-															//Falha ao setar localDescription
-															function() {
-																console.log("Falha ao configurar SDP local");
-															});
+										console.log(ofertaRecebida);
+										pc.createAnswer(
+											function (respostaSDP) {
+											pc.setLocalDescription(
+												new RTCSessionDescription(respostaSDP),
+						   						//Sucesso ao setar localDescription - pode enviar a oferta(trickle ICE)
+												function() {
+													console.log("SDP Local configurado");
+												},
+												//Falha ao setar localDescription
+												function() {
+													console.log("Falha ao configurar SDP local");
+												});
 									}, function(err) {
 										console.log("Não foi possivel construir resposta: "+err);
-									}, constraints);
+									});
 								}, function() {
 									console.log("Falha ao construir SDP remoto");
 								});
@@ -149,15 +155,14 @@ $(function() {
 		function onIceCandidate(evt) {
 			//Espera por todos os candidates serem encontrados e envia para nosso peer
 			if (evt.target.iceGatheringState === "complete") {
-				console.log("Busca ICE completa, enviando SDP para peer remoto");
+				console.log("Busca ICE completa, enviando SDP para peer remoto:");
+				console.log(pc.localDescription);
 				
 				if (isCaller) {
-				var oferta = JSON.stringify ({ "de": nick,
-												"oferta": pc.localDescription
-												});
+				var oferta = { "de": nick,"oferta": pc.localDescription};
 				socket.emit("chamada", JSON.stringify( {"para": peer, "dados":oferta} ));
 				} else {
-					var resposta = JSON.stringify( {"de": nick, "resposta":pc.localDescription });
+					var resposta = {"de": nick, "resposta":pc.localDescription };
 					socket.emit("chamada", JSON.stringify({ "para": peer, "dados":resposta}));
 				}
 			}

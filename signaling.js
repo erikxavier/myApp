@@ -22,7 +22,7 @@ function signaling(server) {
 		  var chamada = JSON.parse(msg);
 		  if (users[chamada.para]) {
 			  users[chamada.para].socket.emit('chamada', msg);
-			  console.log("Mensagem enviada de "+chamada.dados.de+" para "+chamada.para);
+			  console.log("Mensagem enviada de "+chamada.dados.de+" para "+chamada.para);			  
 		  } else {
 			  chamada.error = "Usuário não encontrado!";
 			  socket.emit("chamada", JSON.stringify(chamada));
@@ -31,5 +31,4 @@ function signaling(server) {
 	});
 	return io;	
 }
-
 module.exports = signaling;
